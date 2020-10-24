@@ -84,6 +84,9 @@ function sendNotification(url, result) {
         };
         request.post(options, function (error, response, body) { });
     } else {
+        if(result.error == undefined) {
+            result.error = result.code;
+        }
         var options = {
             uri: config.slack_webhook_url,
             headers: {
