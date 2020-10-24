@@ -1,0 +1,13 @@
+{
+    "slack_webhook_url": "https://hooks.slack.com/services/XXXX/YYYY/ZZZZZZZZZZZZZZ",
+    "slack_channel": "#general",
+    "slack_username": "BOT",
+    "slack_icon": ":thinking_face:",
+    "slack_color_bad": "#D00000",
+    "slack_color_good": "#00D000",
+    "slack_title_bad": "[障害通知]",
+    "slack_title_good": "[復旧通知]",
+    "target_url": [
+        "http://example.com"
+    ]
+}
