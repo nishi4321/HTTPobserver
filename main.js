@@ -43,7 +43,7 @@ function checkHTTPstatus() {
 // 
 function isNeedNotice(url, statusCode) {
     var previousCode = statusMap.get(url);
-    if (previousCode != statusCode && statusCode == 200) {
+    if (previousCode != statusCode && statusCode == 200 && tryCountMap.get(url) >= config.try_count) {
         return true;
     } else {
         if (tryCountMap.get(url) == config.try_count) {
