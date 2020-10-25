@@ -5,6 +5,7 @@ require('date-utils');
 
 // 
 var statusMap = new Map();
+var tryCountMap = new Map();
 
 // Read config.json
 const msg = fs.readFileSync("config.json", { encoding: "utf-8" });
@@ -14,10 +15,11 @@ var config = JSON.parse(msg);
 var targetUrlList = config.target_url;
 for (const targetUrl of targetUrlList) {
     statusMap.set(targetUrl, 200);
+    tryCountMap.set(targetUrl, 0);
 }
 
 // 
-schedule.scheduleJob('0 * * * * *', () => {
+schedule.scheduleJob('*/10 * * * * *', () => {
     checkHTTPstatus();
 });
 
@@ -28,7 +30,7 @@ function checkHTTPstatus() {
     var targetUrlList = config.target_url;
     for (const targetUrl of targetUrlList) {
         getHTTPstatuscode(targetUrl).then(function (result) {
-            var isNotify = isChanged(targetUrl, result.code);
+            var isNotify = isNeedNotice(targetUrl, result.code);
             if (isNotify) {
                 sendNotification(targetUrl, result)
             }
@@ -39,11 +41,14 @@ function checkHTTPstatus() {
 }
 
 // 
-function isChanged(url, statusCode) {
+function isNeedNotice(url, statusCode) {
     var previousCode = statusMap.get(url);
-    if (previousCode != statusCode) {
+    if (previousCode != statusCode && statusCode == 200) {
         return true;
     } else {
+        if (tryCountMap.get(url) == config.try_count) {
+            return true;
+        }
         return false;
     }
 }
@@ -51,6 +56,11 @@ function isChanged(url, statusCode) {
 // 
 function setStatusMap(url, statusCode) {
     statusMap.set(url, statusCode);
+    if (statusCode == 200) {
+        tryCountMap.set(url, 0);
+    } else {
+        tryCountMap.set(url, tryCountMap.get(url) + 1);
+    }
 }
 
 // 
@@ -84,7 +94,7 @@ function sendNotification(url, result) {
         };
         request.post(options, function (error, response, body) { });
     } else {
-        if(result.error == undefined) {
+        if (result.error == undefined) {
             result.error = result.code;
         }
         var options = {
